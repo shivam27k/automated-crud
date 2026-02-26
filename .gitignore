@@ -1,0 +1,6 @@
+.env
+*.tgz
+
+node_modules/
+
+.npm-cache/
