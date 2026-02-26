@@ -1,0 +1,35 @@
+name: Publish Mongoose Package
+
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - "mongoose-v*"
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          registry-url: https://registry.npmjs.org
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Run Tests
+        run: npm test --workspace ./packages/mongoose
+
+      - name: Publish Package
+        working-directory: packages/mongoose
+        run: npm publish --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
