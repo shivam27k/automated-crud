@@ -1,6 +1,6 @@
 {
   "name": "@automate-crud/mongoose",
-  "version": "0.1.0",
+  "version": "0.1.2",
   "description": "Auto CRUD for Express + Mongoose",
   "main": "src/index.js",
   "exports": {
@@ -22,5 +22,15 @@
   },
   "scripts": {
     "test": "node test/run-tests.js"
-  }
+  },
+  "keywords": [
+    "crud",
+    "mongoose",
+    "mongodb",
+    "express",
+    "rest-api",
+    "nodejs",
+    "boilerplate",
+    "automation"
+  ]
 }
