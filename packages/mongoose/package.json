@@ -3,6 +3,13 @@
   "version": "0.1.0",
   "description": "Auto CRUD for Express + Mongoose",
   "main": "src/index.js",
+  "exports": {
+    ".": "./src/index.js"
+  },
+  "files": [
+    "src",
+    "README.md"
+  ],
   "type": "module",
   "license": "MIT",
   "peerDependencies": {

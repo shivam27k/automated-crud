@@ -5,6 +5,9 @@ import { createCrudRouter } from '../src/index.js';
 const app = express();
 app.use(express.json());
 
+if (!process.env.MONGO_URI) {
+    throw new Error("Missing MONGO_URI");
+}
 await mongoose.connect(process.env.MONGO_URI);
 
 const User = mongoose.model("User", new mongoose.Schema(
