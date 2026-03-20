@@ -15,7 +15,8 @@ const User = mongoose.model(
     new mongoose.Schema(
         {
             name: { type: String, required: true },
-            email: { type: String, required: true, unique: true }
+            email: { type: String, required: true, unique: true },
+            archived: { type: Boolean, default: false }
         },
         { timestamps: true }
     )
@@ -196,6 +197,42 @@ async function testBeforeDeleteHook() {
     assert.notEqual(found, null);
 }
 
+async function testCustomRoute() {
+    await resetDb();
+
+    const user = await User.create({
+        name: "A",
+        email: "a@test.com"
+    })
+
+    const app = express();
+    app.use(express.json());
+    app.use(
+        "/users",
+        createCrudRouter({
+            model: User,
+            customRoutes: [{
+                method: "post",
+                path: "/:id/archive",
+                handler: async ({ params, model }) => {
+                    return model.findByIdAndUpdate(
+                        params.id,
+                        { archived: true },
+                        { new: true }
+                    ).lean();
+                }
+            }]
+        })
+    )
+
+    app.use(crudErrorHandler);
+
+    const res = await request(app).post(`/users/${user._id}/archive`);
+
+    assert.equal(res.status, 200);
+    assert.equal(res.body.data.archived, true);
+}
+
 
 
 try {
@@ -205,8 +242,9 @@ try {
     await testDelete();
     await test404();
     await testBeforeCreateHook();
+    await testBeforeUpdateHook();
     await testBeforeDeleteHook();
-    await testBeforeDeleteHook();
+    await testCustomRoute();
     console.log("all tests passed");
 } finally {
     await mongoose.disconnect();

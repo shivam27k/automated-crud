@@ -68,7 +68,8 @@ export function createCrudRouter({
     searchFields = [],
     allowedIncludes = [],
     idParam = "id",
-    hooks = {}
+    hooks = {},
+    customRoutes = []
 }) {
     if (!model) throw new Error("createCrudRouter requires a Mongoose model");
 
@@ -186,7 +187,7 @@ export function createCrudRouter({
     // DELETE  
     router.delete(idPath, async (req, res, next) => {
         try {
-            if(hooks.beforeDelete) {
+            if (hooks.beforeDelete) {
                 await hooks.beforeDelete(req);
             }
 
@@ -201,6 +202,31 @@ export function createCrudRouter({
             next(error);
         }
     });
+
+    for (const route of customRoutes) {
+        const method = String(route.method || "get").toLowerCase();
+        const path = route.path;
+        const handler = route.handler;
+
+        if (!path || typeof handler !== "function") continue;
+        if (typeof router[method] !== "function") continue;
+
+        router[method](path, async (req, res, next) => {
+            try {
+                const result = await handler({
+                    req,
+                    params: req.params,
+                    query: req.query,
+                    body: req.body,
+                    model
+                });
+
+                res.json({ data: result });
+            } catch (error) {
+                next(error);
+            }
+        })
+    }
 
     return router;
 }
