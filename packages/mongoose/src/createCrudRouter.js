@@ -67,7 +67,8 @@ export function createCrudRouter({
     model,
     searchFields = [],
     allowedIncludes = [],
-    idParam = "id"
+    idParam = "id",
+    hooks = {}
 }) {
     if (!model) throw new Error("createCrudRouter requires a Mongoose model");
 
@@ -145,7 +146,13 @@ export function createCrudRouter({
     // CREATE
     router.post("/", async (req, res, next) => {
         try {
-            const created = await model.create(req.body);
+            let body = req.body;
+
+            if (hooks.beforeCreate) {
+                body = await hooks.beforeCreate(req, body);
+            }
+
+            const created = await model.create(body);
             res.status(201).json({ data: created.toObject() });
         } catch (error) {
             next(error);
@@ -155,7 +162,13 @@ export function createCrudRouter({
     // UPDATE
     router.patch(idPath, async (req, res, next) => {
         try {
-            const updated = await model.findByIdAndUpdate(req.params[idParam], req.body, {
+            let body = req.body;
+
+            if (hooks.beforeUpdate) {
+                body = await hooks.beforeUpdate(req, body);
+            }
+
+            const updated = await model.findByIdAndUpdate(req.params[idParam], body, {
                 new: true,
                 runValidators: true
             }).lean().exec()
@@ -173,6 +186,10 @@ export function createCrudRouter({
     // DELETE  
     router.delete(idPath, async (req, res, next) => {
         try {
+            if(hooks.beforeDelete) {
+                await hooks.beforeDelete(req);
+            }
+
             const deleted = await model.findByIdAndDelete(req.params[idParam]).lean().exec();
 
             if (!deleted) {
