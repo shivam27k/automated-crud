@@ -2,6 +2,10 @@
 
 Automate CRUD is a package family for removing repetitive backend CRUD code.
 
+For the current Mongoose package documentation, start here:
+
+- [`packages/mongoose/README.md`](packages/mongoose/README.md)
+
 The idea is simple:
 
 - define your model
